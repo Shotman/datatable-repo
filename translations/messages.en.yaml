@@ -1,0 +1,6 @@
+dt:
+  columns:
+    name: Name
+    age: Age
+    phone: Phone
+    address: Address

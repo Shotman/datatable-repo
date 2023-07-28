@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello TestController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    <div id="persons">Loading...</div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        jQuery('#persons').initDataTables({{ datatable_settings(table) }}, {
+            info:false,
+            searching:true,
+            initComplete: function () {
+                let api = this.api();
+                console.log(api.state.loaded());
+                api.columns().every(function () {
+                    let column = this;
+                    let title = column.header().textContent;
+                    let th = column.header();
+
+                    // Create input element
+                    let input = document.createElement('input');
+                    input.classList.add('form-control');
+                    input.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                    });
+                    input.placeholder = title;
+                    th.replaceChildren(input);
+
+                    // Event listener for user input
+                    let debouncedFunction = debounce(() => {
+                        if (column.search() !== this.value) {
+                            let idx = [...th.parentNode.children].indexOf(th);
+                            let val = input.value;
+                            api.column(idx + ':visible')
+                                .search(val ? '%'+val+'%' : '')
+                                .draw();
+                        }
+                    },500)
+                    input.addEventListener('keyup', debouncedFunction);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
